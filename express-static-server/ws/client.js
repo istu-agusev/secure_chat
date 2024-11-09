@@ -11,7 +11,7 @@ rl.question(`What's your name? `, name => {
     rl.close();
     init(name);
 });
-
+ 
 const init = (name) => {
     const client =new ChatClient({ url: 'ws://localhost:8080', username: name})
     client.init();

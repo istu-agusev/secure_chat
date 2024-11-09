@@ -53,7 +53,7 @@ class ChatServer {
         this.clientMap.set(client.sessionId, client);
         console.log(`Client ${client.username} connected`);
     }
-
+ 
     broadcast(msgObject) {
         const sender = this.clientMap.get(msgObject.sessionId);
 

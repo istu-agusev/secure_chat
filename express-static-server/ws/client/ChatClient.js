@@ -25,7 +25,7 @@ class ChatClient {
         }));
 
     }
-
+ 
     onMessage(data) {
         const parsedData = JSON.parse(data)
 
