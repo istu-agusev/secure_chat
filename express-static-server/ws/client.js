@@ -1,18 +1,36 @@
-const {WebSocket} = require('ws');
 
-const wsClientFactory = (id) => {
-    const ws = new WebSocket('ws://localhost:8080');
-    ws.on('error', console.error);
+const readline = require(`node:readline`);
+const {ChatClient} = require('./client/ChatClient');
 
-    ws.on('open', function open() {
-    console.log('connected');
-    ws.send("${id} Hello")
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
+rl.question(`What's your name? `, name => {
+    rl.close();
+    init(name);
+});
+ 
+const init = (name) => {
+    const client =new ChatClient({ url: 'ws://localhost:8080', username: name})
+    client.init();
+
+    const chatInput = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
     });
 
-    ws.on('message', function message(data) {
-    console.log('${id} received: %s', data);
+    chatInput.on('line', (input) => {
+
+        if (input.trim().toLowerCase() === `exit`) {
+            chatInput.close();
+        }
+        else {
+
+            client.send(input)
+        }
     });
+
 }
-const wsClient1 = wsClientFactory(1);
-const wsClient2 = wsClientFactory(2);
-const wsClient3 = wsClientFactory(3);
+
