@@ -31,6 +31,8 @@ class ChatServer {
         switch (msgObject.type) {
             case `message`: {
                 this.broadcast(msgObject);
+                const sender = this.clientMap.get(msgObject.sessionId);
+                console.log(`Name:`, sender.username)
                 break;
             }
             case `options`: {
@@ -44,6 +46,17 @@ class ChatServer {
     }
 
     createClient(ws, msgObject) {
+        const isClientExists = this.clientMap.get(msgObject.sessionId);
+
+        if (isClientExists) {
+            const client = this.clientMap.get(msgObject.sessionId);
+            client.updateWS(ws);
+
+            console.log(`Client ${client.username} connected`);
+
+            return
+        }
+
         const client = new Client({
             ws: ws,
             username: msgObject.data.username,
