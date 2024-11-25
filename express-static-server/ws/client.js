@@ -9,19 +9,21 @@ const rl = readline.createInterface({
 
 const sessionIdIndex = process.argv.indexOf('--sessionId');
 const nameIndex = process.argv.indexOf('--name');
+const keyIndex = process.argv.indexOf('--key');
 
-if (sessionIdIndex === -1 && nameIndex === -1) {
+if (sessionIdIndex === -1 && nameIndex === -1 && keyIndex === -1) {
     console.log('Arguments  sessionId or name are required')
     process.exit(1);
 }
 
 const sessionId = sessionIdIndex !== -1 ? process.argv[sessionIdIndex + 1] : null;
 const name = nameIndex !== -1 ? process.argv[nameIndex + 1] : null;
+const key = keyIndex !== -1 ? process.argv[keyIndex + 1] : null;
 
-init(name, sessionId);
+init(name, sessionId, key);
  
-function init(name, sessionId) {
-    const client =new ChatClient({ url: 'ws://localhost:8080', username: name, sessionId})
+function init(name, sessionId, secretKey) {
+    const client =new ChatClient({ url: 'ws://localhost:8080', username: name, sessionId, secretKey})
     client.init();
 
     const chatInput = readline.createInterface({

@@ -1,10 +1,32 @@
 const {WebSocket} = require('ws');
+const crypto = require('node:crypto');
+
+//const secretKey = 'aelwfhlaef';
+const secretIV = 'aifjaoeifjo';
+const encMethod = 'aes-256-cbc';
+
+//const key = crypto.createHash('sha512').update(secretKey).digest('hex').substring(0,32)
+const encIv = crypto.createHash('sha512').update(secretIV).digest('hex').substring(0,16)
+
+function encryptData (data, key, encIv) {
+    const cipher = crypto.createCipheriv(encMethod, key, encIv)
+    const encrypted = cipher.update(data, 'utf8', 'hex') + cipher.final('hex')
+    return Buffer.from(encrypted).toString('base64')
+}
+
+function decryptData(encryptedData, key, encIv) {
+    const buff = Buffer.from(encryptedData, 'base64')
+    encryptedData = buff.toString('utf-8')
+    const decipher = crypto.createDecipheriv(encMethod, key, encIv)
+    return decipher.update(encryptedData, 'hex', 'utf8') + decipher.final('utf8')
+}
 
 class ChatClient {
     constructor(options) {
         this.ws = new WebSocket(options.url);
         this.sessionId = options.sessionId || null;
         this.username = options.username;
+        this.key = crypto.createHash('sha512').update(options.secretKey).digest('hex').substring(0,32);
     }
 
     init() {
@@ -27,12 +49,12 @@ class ChatClient {
     }
  
     onMessage(data) {
-        const parsedData = JSON.parse(data)
+        const parsedData = JSON.parse(data.toString())
 
         
         switch (parsedData.type) {
             case `message`:
-                console.log(`${parsedData.data.sender} >>: ${parsedData.data.message}`)
+                console.log(`${parsedData.data.sender} >>: ${decryptData(parsedData.data.message, parsedData.data.key, encIv)}`)
                 break;
             case `options`:
                 this.setOptions(parsedData)
@@ -48,10 +70,13 @@ class ChatClient {
     }
 
     send(data) {
+        const encData = encryptData(data, this.key, encIv)
+
         const msgObject = {
             type: `message`,
             sessionId: this.sessionId,
-            data: data
+            key: this.key,
+            data: encData
         };
 
         this.ws.send(JSON.stringify(msgObject));
