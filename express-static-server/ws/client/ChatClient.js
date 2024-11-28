@@ -68,7 +68,7 @@ class ChatClient {
     }
 
     send(data) {
-        encIv = crypto.createHash('sha512').update(crypto.randomBytes(16)).digest('hex').substring(0,16);
+        const encIv = crypto.createHash('sha512').update(crypto.randomBytes(16)).digest('hex').substring(0,16);
         const encData = encryptData(data, this.key, encIv)
 
         const msgObject = {
