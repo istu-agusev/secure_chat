@@ -76,7 +76,7 @@ class ChatServer {
                     type: `message`,
                     data: {
                         sender: sender.username,
-                        key: msgObject.key,
+                        encIv: msgObject.encIv,
                         message: msgObject.data
                     }
                 });

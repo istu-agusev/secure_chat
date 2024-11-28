@@ -2,11 +2,11 @@ const {WebSocket} = require('ws');
 const crypto = require('node:crypto');
 
 //const secretKey = 'aelwfhlaef';
-const secretIV = 'aifjaoeifjo';
+
 const encMethod = 'aes-256-cbc';
 
 //const key = crypto.createHash('sha512').update(secretKey).digest('hex').substring(0,32)
-const encIv = crypto.createHash('sha512').update(secretIV).digest('hex').substring(0,16)
+//const encIv = crypto.createHash('sha512').update(secretIV).digest('hex').substring(0,16)
 
 function encryptData (data, key, encIv) {
     const cipher = crypto.createCipheriv(encMethod, key, encIv)
@@ -27,6 +27,7 @@ class ChatClient {
         this.sessionId = options.sessionId || null;
         this.username = options.username;
         this.key = crypto.createHash('sha512').update(options.secretKey).digest('hex').substring(0,32);
+        this.encIv = crypto.createHash('sha512').update(crypto.randomBytes(16)).digest('hex').substring(0,16);
     }
 
     init() {
@@ -54,7 +55,7 @@ class ChatClient {
         
         switch (parsedData.type) {
             case `message`:
-                console.log(`${parsedData.data.sender} >>: ${decryptData(parsedData.data.message, parsedData.data.key, encIv)}`)
+                console.log(`${parsedData.data.sender} >>: ${decryptData(parsedData.data.message, this.key, parsedData.data.encIv)}`)
                 break;
             case `options`:
                 this.setOptions(parsedData)
@@ -70,12 +71,12 @@ class ChatClient {
     }
 
     send(data) {
-        const encData = encryptData(data, this.key, encIv)
+        const encData = encryptData(data, this.key, this.encIv)
 
         const msgObject = {
             type: `message`,
             sessionId: this.sessionId,
-            key: this.key,
+            encIv: this.encIv,
             data: encData
         };
 
